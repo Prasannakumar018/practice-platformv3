@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  api-gateway:
+    build: ./services/api-gateway
+    ports:
+      - "8000:8000"
+    environment:
+      - SUPABASE_URL=https://tubttlmskanjyskkvoaj.supabase.co
+      - SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR1YnR0bG1za2Fuanlza2t2b2FqIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2MzUxOTUyMiwiZXhwIjoyMDc5MDk1NTIyfQ.4AGMzurr1QqXcBIQU5h2C1DlWEzK9b2x6iaEAW9XNa0
+      - USER_SERVICE_URL=http://user-service:8001
+      - FILE_SERVICE_URL=http://file-service:8002
+      - QUESTION_SERVICE_URL=http://question-service:8003
+      - GEMINI_API_KEY=AIzaSyC9NXQWs_nI54pFRHHryMq1hVKC4otQ0Qo
+    depends_on:
+      - user-service
+      - file-service
+      - question-service
+
+  user-service:
+    build: ./services/user-service
+    ports:
+      - "8001:8001"
+    environment:
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+      - DATABASE_URL=${DATABASE_URL}
+
+  file-service:
+    build: ./services/file-service
+    ports:
+      - "8002:8002"
+    environment:
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+
+  question-service:
+    build: ./services/question-service
+    ports:
+      - "8003:8003"
+    environment:
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
