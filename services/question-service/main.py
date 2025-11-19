@@ -28,7 +28,7 @@ from pydantic import BaseModel
 from typing import List, Optional, Dict, Any
 import os
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from supabase import create_client, Client
 import google.generativeai as genai
 import json
@@ -155,7 +155,7 @@ def generate_questions_with_gemini(text: str, config: Dict[str, Any], previous_q
     - Avoid these previous questions: {', '.join(previous_questions[:5])}
     
     Content:
-    {text[:1000]}
+    {text[:100]}
     
     Return ONLY a JSON array in this exact format:
     [
@@ -237,7 +237,7 @@ async def list_rulesets(current_user = Depends(get_current_user)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/generate", response_model=List[GeneratedQuestion], status_code=status.HTTP_201_CREATED)
+@app.post("/generate", status_code=status.HTTP_201_CREATED)
 async def generate_questions(request: GenerateQuestionsRequest, current_user = Depends(get_current_user)):
     """
     Generate questions using AI based on file content and ruleset.
@@ -402,11 +402,13 @@ async def finish_quiz(quiz_id: str, current_user = Depends(get_current_user)):
         time_taken = None
         if quiz_data.get("start_time"):
             start_time = datetime.fromisoformat(quiz_data["start_time"])
-            time_taken = int((datetime.now() - start_time).total_seconds() / 60)
-        
+            if start_time.tzinfo is None:
+                start_time = start_time.replace(tzinfo=timezone.utc)
+            now = datetime.now(timezone.utc)
+            time_taken = int((now - start_time).total_seconds() / 60)
         # Update quiz status
         supabase.table("quizzes").update({
-            "end_time": datetime.now().isoformat(),
+            "end_time": datetime.now(timezone.utc).isoformat(),
             "status": "completed",
             "score": score
         }).eq("quiz_id", quiz_id).execute()

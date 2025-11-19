@@ -179,6 +179,18 @@ async def generate_proxy(request: Request):
         dict(request.query_params)
     )
 
+
+@app.api_route("/api/quizzes", methods=["GET", "POST", "PUT", "DELETE"])
+async def quizzes_root_proxy(request: Request):
+    url = f"{QUESTION_SERVICE_URL}/quizzes"
+    return await proxy_request(
+        url,
+        request.method,
+        dict(request.headers),
+        await request.body(),
+        dict(request.query_params)
+    )
+
 @app.api_route("/api/quizzes/{path:path}", methods=["GET", "POST", "PUT", "DELETE"])
 async def quizzes_proxy(path: str, request: Request):
     url = f"{QUESTION_SERVICE_URL}/quizzes/{path}"

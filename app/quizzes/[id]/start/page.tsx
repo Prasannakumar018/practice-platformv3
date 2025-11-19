@@ -18,13 +18,21 @@ export default function QuizPage() {
     const startQuiz = async () => {
       try {
         await apiClient.startQuiz(quizId);
-        // In a real app, fetch questions here
+        // Try to load questions from localStorage
+        let loadedQuestions = [];
+        if (typeof window !== 'undefined') {
+          const qStr = localStorage.getItem(`quiz_questions_${quizId}`);
+          if (qStr) {
+            loadedQuestions = JSON.parse(qStr);
+          }
+        }
+        console.log('Loaded questions:', loadedQuestions);
+        setQuestions(loadedQuestions);
         setLoading(false);
       } catch (err) {
         console.error(err);
       }
     };
-
     startQuiz();
   }, [quizId]);
 

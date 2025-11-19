@@ -46,6 +46,10 @@ export default function GenerateQuizPage() {
         selectedRuleset,
         questions.map((q: any) => q.id)
       );
+      // Store questions in localStorage for the start page
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(`quiz_questions_${quiz.quiz_id}`, JSON.stringify(questions));
+      }
       router.push(`/quizzes/${quiz.quiz_id}/start`);
     } catch (err: any) {
       setError(err.message || 'Failed to generate quiz');
